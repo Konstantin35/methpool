@@ -315,7 +315,7 @@ func updatePendingBlock() {
 }
 
 func callArray(method string, params []interface{}) (*ResponseArray, error) {
-	url := "http://localhost:" + ethereumPort
+	url := "http://199.204.46.52:" + ethereumPort
 	jsonReq := &Request{
 		Id:      1,
 		Jsonrpc: "2.0",
