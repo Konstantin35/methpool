@@ -68,6 +68,6 @@ class SaleItem(Base):
             'url': make_external('/forsale/%s/single_item' % self.id)
         }
 
-engine = create_engine('mysql+mysqldb://gtxll8:Sp3ctrum@localhost/methpool')
+engine = create_engine('mysql://gtxll8:Sp3ctrum@localhost/methpool')
 
 Base.metadata.create_all(engine)
