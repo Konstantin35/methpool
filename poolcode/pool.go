@@ -201,7 +201,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
     mysqldiff := minerDifficulty * 4
 
-    db, err := sql.Open("mysql", "pool_user:Sp3ctrum@localhost/methpool?charset=utf8")  // of course you have to enter your credentials here !
+    db, err := sql.Open("mysql", "pool_user:Sp3ctrum@199.204.46.52/methpool?charset=utf8")  // of course you have to enter your credentials here !
     checkErr(err)
     defer db.Close()
     
