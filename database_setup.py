@@ -9,11 +9,25 @@ from datetime import datetime
 from urlparse import urljoin
 from flask import request
 
+
 def make_external(url):
     return urljoin(request.url_root, url)
 
 
 Base = declarative_base()
+
+
+class Shares(Base):
+    __tablename__ = 'shares'
+    id = Column(Integer, primary_key=True)
+    time = Column(DateTime, nullable=False)
+    rem_host = Column(String(80), nullable=False)
+    username = Column(String(80), nullable=False)
+    our_result = Column(String(250), nullable=False)
+    upstream_result = Column(String(250), nullable=False)
+    difficulty = Column(String(80), nullable=False)
+    reason = Column(String(80), nullable=False)
+    solution = Column(String(250), nullable=False)
 
 
 class Users(Base):
@@ -39,7 +53,8 @@ class SaleItem(Base):
     last_updated = Column(DateTime, nullable=False)
     user = relationship(Users)
 
-    def __init__(self, name, description, price, image_name, category_name, user_id, user_name, contact, last_updated=None):
+    def __init__(self, name, description, price, image_name, category_name, user_id, user_name, contact,
+                 last_updated=None):
         self.name = name
         self.description = description
         self.price = price
@@ -67,6 +82,7 @@ class SaleItem(Base):
             'contact': self.contact,
             'url': make_external('/forsale/%s/single_item' % self.id)
         }
+
 
 engine = create_engine('mysql://pool_user:Sp3ctrum@localhost/methpool')
 
