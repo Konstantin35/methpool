@@ -26,7 +26,7 @@ class Shares(Base):
     our_result = Column(String(250), nullable=False)
     upstream_result = Column(String(250), nullable=False)
     difficulty = Column(String(80), nullable=False)
-    reason = Column(String(80), nullable=False)
+    reason = Column(String(80))
     solution = Column(String(250), nullable=False)
 
 
