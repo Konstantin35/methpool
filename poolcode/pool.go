@@ -201,7 +201,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
     mysqldiff := minerDifficulty * 4
 
-    db, err := sql.Open("mysql", "pool_user:Sp3ctrum@199.204.46.52/methpool?charset=utf8")  // of course you have to enter your credentials here !
+    db, err := sql.Open("mysql", "pool_user:Sp3ctrum@localhost/methpool?charset=utf8")  // of course you have to enter your credentials here !
     checkErr(err)
     defer db.Close()
     
@@ -315,7 +315,7 @@ func updatePendingBlock() {
 }
 
 func callArray(method string, params []interface{}) (*ResponseArray, error) {
-	url := "http://199.204.46.52:" + ethereumPort
+	url := "http://localhost:" + ethereumPort
 	jsonReq := &Request{
 		Id:      1,
 		Jsonrpc: "2.0",
@@ -356,7 +356,7 @@ func callArray(method string, params []interface{}) (*ResponseArray, error) {
 }
 
 func callBool(method string, params []interface{}) (*ResponseBool, error) {
-	url := "http://199.204.46.52:" + ethereumPort
+	url := "http://localhost:" + ethereumPort
 	jsonReq := &Request{
 		Id:      1,
 		Jsonrpc: "2.0",
@@ -397,7 +397,7 @@ func callBool(method string, params []interface{}) (*ResponseBool, error) {
 }
 
 func callJSON(method string, params []interface{}) (*ResponseJSON, error) {
-	url := "http://199.204.46.52:" + ethereumPort
+	url := "http://localhost:" + ethereumPort
 	jsonReq := &Request{
 		Id:      1,
 		Jsonrpc: "2.0",
