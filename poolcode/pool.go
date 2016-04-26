@@ -124,11 +124,18 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     defer db.Close()
 
     // query
-    shares, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 1 HOUR)")
+    rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 1 HOUR)")
     checkErr(err)
 
+    for rows.Next() {
+        var cnt int
+        err = rows.Scan(&cnt)
+        checkErr(err)
+        fmt.Println(cnt)
+    }
+
     // print
-    fmt.Fprint(rw, getErrorResponse("Shares / hour : "+shares))
+    fmt.Fprint(rw, getErrorResponse("Shares / hour : "+cnt))
 
 
 
