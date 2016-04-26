@@ -134,10 +134,6 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         fmt.Println(cnt)
     }
 
-    // print
-    fmt.Fprint(rw, getErrorResponse("Shares / hour : "+cnt))
-
-
 
 	minerDifficulty, err := strconv.ParseFloat(vars["difficulty"], 64)
 	if err != nil {
