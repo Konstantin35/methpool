@@ -128,7 +128,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     checkErr(err)
 
     // print
-    logInfo.Println("Number of shares in last hour:" + shares")
+    fmt.Fprint(rw, getErrorResponse("Shares / hour : "+shares))
 
 
 
