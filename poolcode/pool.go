@@ -221,7 +221,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 	if (upres == "Y") {
 
-		stmt2, err2 := db.Prepare("INSERT INTO blocks (time, height, blockhash, confirmations, accounted) VALUES ( time.Unix(secs, 0), ?, ?, '0', '0')")
+		stmt2, err2 := db.Prepare("INSERT INTO blocks (time, height, blockhash, confirmations, accounted) VALUES ( (UNIX_TIMESTAMP(),  '%Y %D %M %h:%i:%s %x'), ?, ?, '0', '0')")
 		checkErr(err2)
 
 		res2, err2 := stmt2.Exec(myBlock.number, strings.ToLower(mysqlmixDigest))
