@@ -118,6 +118,19 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
             vars["difficulty"] = "5"
         }
 
+	// test
+	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
+    checkErr(err)
+    defer db.Close()
+
+    // query
+    shares, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 1 HOUR)")
+    checkErr(err)
+
+    // print
+    logInfo.Println("Number of shares in last hour:" + shares")
+
+
 
 	minerDifficulty, err := strconv.ParseFloat(vars["difficulty"], 64)
 	if err != nil {
