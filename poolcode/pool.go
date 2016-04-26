@@ -131,7 +131,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         var cnt int
         err = rows.Scan(&cnt)
         checkErr(err)
-        fmt.Println(cnt)
+        fmt.Println("Shares / hour :"+cnt)
     }
 
 
