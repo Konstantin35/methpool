@@ -143,6 +143,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 		// return
 	}
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
+	fmt.println("minerAdjustedDifficulty:"+minerAdjustedDifficulty)
 
 	miner := vars["miner"]
 	worker := "default"
