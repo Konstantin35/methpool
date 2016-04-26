@@ -131,7 +131,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         var cnt int
         err = rows.Scan(&cnt)
         checkErr(err)
-        fmt.Println("Shares / hour :"+cnt)
+        fmt.Println("Shares / hour :" + cnt)
     }
 
 
@@ -143,7 +143,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 		// return
 	}
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
-	fmt.println("minerAdjustedDifficulty:"+minerAdjustedDifficulty)
+	fmt.println("minerAdjustedDifficulty:" + minerAdjustedDifficulty)
 
 	miner := vars["miner"]
 	worker := "default"
