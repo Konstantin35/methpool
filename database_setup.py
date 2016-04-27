@@ -50,4 +50,4 @@ class Blocks(Base):
 
 engine = create_engine('mysql://pool_user:Sp3ctrum@localhost/methpool')
 
-Base.metadata.create_all(engine)
+Base.metadata.create_all(engine,  checkfirst=True)
