@@ -98,14 +98,14 @@ func main() {
 	logError = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
 	logInfo.Println("Welcome to ethpool 2.0")
 	logInfo.Println("Pool port is", poolPort)
-	logInfo.Println("Point your miners to: http://<ip>:" + poolPort + "/{miner}/{difficulty}")
+	logInfo.Println("Point your miners to: http://<ip>:" + poolPort + "/{miner}.{difficulty}")
 
 
 	go updateWork()
 	go updatePendingBlock()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/{miner}/{difficulty}", handleMiner)
+	r.HandleFunc("/{miner}.{difficulty}", handleMiner)
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":5082", nil))
 }
