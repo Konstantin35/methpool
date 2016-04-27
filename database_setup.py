@@ -31,13 +31,21 @@ class Shares(Base):
 
 
 class Blocks(Base):
-     __tablename__ = 'blocks'
-     id = Column(Integer, primary_key=True)
-     time = Column(DateTime, nullable=False)
-     height = Column(String(80), nullable=False)
-     blockhash = Column(String(250), nullable=False)
-     confirmations = Column(String(80), nullable=False)
-     accounted = Column(String(80), nullable=False)
+    __tablename__ = 'blocks'
+    id = Column(Integer, primary_key=True)
+    time = Column(DateTime, nullable=False)
+    height = Column(String(80), nullable=False)
+    blockhash = Column(String(250), nullable=False)
+    confirmations = Column(String(80), nullable=False)
+    accounted = Column(String(80), nullable=False)
+
+
+class Blocks(Base):
+    __tablename__ = 'miners'
+    id = Column(Integer, primary_key=True)
+    address = Column(String(80), nullable=False)
+    hashrate = Column(String(80), nullable=False)
+    difficulty = Column(String(80), nullable=False)
 
 
 engine = create_engine('mysql://pool_user:Sp3ctrum@localhost/methpool')

@@ -118,6 +118,8 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
             vars["difficulty"] = "5"
         }
 
+	fmt.Printf(vars["miner"])
+
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
     checkErr(err)
