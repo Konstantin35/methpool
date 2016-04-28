@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -44,9 +44,9 @@ class Blocks(Base):
 class Miners(Base):
     __tablename__ = 'miners'
     id = Column(Integer, primary_key=True)
-    address = Column(String(80), nullable=False)
+    address = Column(String(80), unique=True)
     worker = Column(String(80), nullable=False)
-    hashrate = Column(String(80), nullable=False)
+    sharerate = Column(String(80), nullable=False)
     difficulty = Column(String(80), nullable=False)
 
 
