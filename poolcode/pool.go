@@ -46,6 +46,7 @@ var okRequest = `{
 //test
 
 var minerShares = 0
+
 var pow256 = common.BigPow(2, 256)
 
 var hasher = ethash.New()
@@ -101,14 +102,14 @@ func main() {
 	logError = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
 	logInfo.Println("Welcome to ethpool 2.0")
 	logInfo.Println("Pool port is", poolPort)
-	logInfo.Println("Point your miners to: http://<ip>:" + poolPort + "/{miner}.{difficulty}")
+	logInfo.Println("Point your miners to: http://<ip>:" + poolPort + "/{miner}.{worker}")
 
 
 	go updateWork()
 	go updatePendingBlock()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/{miner}.{difficulty}", handleMiner)
+	r.HandleFunc("/{miner}.{worker}", handleMiner)
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":5082", nil))
 }
@@ -117,8 +118,8 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-        if vars["difficulty"] == "0" {
-            vars["difficulty"] = "5"
+        if minerShares = 0 {
+            minerShares = 5
         }
 
 	fmt.Printf(vars["miner"])
@@ -137,22 +138,18 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         err = rows.Scan(&cnt)
         checkErr(err)
         minerShares = cnt
-        fmt.Printf("number of shares in 3 minutes: %d\n", minerShares)
+        fmt.Println("number of shares in 3 minutes: %d\n", minerShares)
     }
 
+	// testing difficulty
+	minerDifficulty = 3 // Set a fixed difficulty (5MH/s) in this case
 
-	minerDifficulty, err := strconv.ParseFloat(vars["difficulty"], 64)
-	if err != nil {
-		logError.Println("Invalid difficulty provided: " + vars["difficulty"])
-		minerDifficulty = 3 // Set a fixed difficulty (5MH/s) in this case
-		// fmt.Fprint(rw, getErrorResponse("Invalid difficulty provided: "+vars["difficulty"]))
-		// return
-	}
+
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
 	fmt.Printf("Miner difficulty: %d\n", minerAdjustedDifficulty)
 
 	miner := vars["miner"]
-	worker := "default"
+	worker := vars["worker"]
 
 	decoder := json.NewDecoder(req.Body)
 	var t Request
@@ -229,11 +226,11 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     checkErr(err)
     defer db.Close()
 
-    stmt, err := db.Prepare("INSERT INTO shares (time, rem_host, username, our_result, upstream_result, difficulty, reason, solution) VALUES ( NOW(), ?, ?, ?, ?, ?, NULL, ?) ")
+    stmt, err := db.Prepare("INSERT INTO shares (time, rem_host, address, worker, our_result, upstream_result, difficulty, reason, solution) VALUES ( NOW(), ?, ?, ?, ?, ?, ?, NULL, ?) ")
     checkErr(err)
 
     mysqlmixDigest := strings.Replace(mixDigest, "0x", "", -1)
-    res, err := stmt.Exec(remoteip, miner, oures, upres, mysqldiff, strings.ToLower(mysqlmixDigest))
+    res, err := stmt.Exec(remoteip, miner, worker, oures, upres, mysqldiff, strings.ToLower(mysqlmixDigest))
     checkErr(err)
 
     id, err := res.LastInsertId()
