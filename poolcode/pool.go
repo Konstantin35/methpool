@@ -45,7 +45,9 @@ var okRequest = `{
 
 //test
 
-var minerShares = 0
+var minerShares int
+
+var minerDifficulty int
 
 var pow256 = common.BigPow(2, 256)
 
@@ -118,9 +120,10 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-        if minerShares = 0 {
-            minerShares = 5
-        }
+        if minerShares == 0 {
+    } else {
+    	minerShares = 3
+    }
 
 	fmt.Printf(vars["miner"])
 
@@ -142,7 +145,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// testing difficulty
-	minerDifficulty = 3 // Set a fixed difficulty (5MH/s) in this case
+	minerDifficulty = 0.2 // Set a fixed difficulty (5MH/s) in this case
 
 
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
