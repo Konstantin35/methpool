@@ -151,7 +151,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty) VALUES ( ?, ?, ?, ?) ON DUPLICATE KEY UPDATE address = VALUES(address)")
     checkErr(err)
 
-    res, err := stmt.Exec((miner + worker), worker, cnt, minerDifficulty)
+    res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
     checkErr(err)
 
     id, err := res.LastInsertId()
