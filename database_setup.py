@@ -44,6 +44,7 @@ class Blocks(Base):
     __tablename__ = 'miners'
     id = Column(Integer, primary_key=True)
     address = Column(String(80), nullable=False)
+    worker = Column(String(80), nullable=False)
     hashrate = Column(String(80), nullable=False)
     difficulty = Column(String(80), nullable=False)
 
