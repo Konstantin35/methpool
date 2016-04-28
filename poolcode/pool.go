@@ -125,7 +125,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     	minerShares = 3
     }
 
-	fmt.Printf(vars["miner"])
+	fmt.Println(vars["miner"])
 
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
@@ -141,7 +141,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         err = rows.Scan(&cnt)
         checkErr(err)
         minerShares = cnt
-        fmt.Println("number of shares in 3 minutes: %d\n", minerShares)
+        fmt.Println("number of shares in 3 minutes:", minerShares)
     }
 
 	// testing difficulty
@@ -149,7 +149,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
-	fmt.Printf("Miner difficulty: %d\n", minerAdjustedDifficulty)
+	fmt.Println("Miner difficulty: %d\n", minerAdjustedDifficulty)
 
 	miner := vars["miner"]
 	worker := vars["worker"]
