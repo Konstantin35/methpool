@@ -23,6 +23,7 @@ class Shares(Base):
     time = Column(DateTime, nullable=False)
     rem_host = Column(String(80), nullable=False)
     username = Column(String(80), nullable=False)
+    worker = Column(String(80), nullable=False)
     our_result = Column(String(250), nullable=False)
     upstream_result = Column(String(250), nullable=False)
     difficulty = Column(String(80), nullable=False)
@@ -40,7 +41,7 @@ class Blocks(Base):
     accounted = Column(String(80), nullable=False)
 
 
-class Blocks(Base):
+class Miners(Base):
     __tablename__ = 'miners'
     id = Column(Integer, primary_key=True)
     address = Column(String(80), nullable=False)
