@@ -43,6 +43,9 @@ var okRequest = `{
   "result": true
 }`
 
+//test
+
+var minerShares = 0
 var pow256 = common.BigPow(2, 256)
 
 var hasher = ethash.New()
@@ -126,21 +129,22 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     defer db.Close()
 
     // query
-    rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 1 HOUR)")
+    rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)")
     checkErr(err)
 
     for rows.Next() {
         var cnt int
         err = rows.Scan(&cnt)
         checkErr(err)
-        fmt.Printf("number of shares per hour: %d\n", cnt)
+        minerShares = cnt
+        fmt.Printf("number of shares in 3 minutes: %d\n", minerShares)
     }
 
 
 	minerDifficulty, err := strconv.ParseFloat(vars["difficulty"], 64)
 	if err != nil {
 		logError.Println("Invalid difficulty provided: " + vars["difficulty"])
-		minerDifficulty = 5 // Set a fixed difficulty (5MH/s) in this case
+		minerDifficulty = 3 // Set a fixed difficulty (5MH/s) in this case
 		// fmt.Fprint(rw, getErrorResponse("Invalid difficulty provided: "+vars["difficulty"]))
 		// return
 	}
@@ -165,6 +169,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(rw, getWorkPackage(difficulty))
 	} else if t.Method == "eth_submitHashrate" {
 		fmt.Fprint(rw, okRequest)
+		fmt.Fprint(rw, "here:")
 	} else if t.Method == "eth_submitWork" {
 		paramsOrig := t.Params[:]
 
