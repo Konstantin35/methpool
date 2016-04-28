@@ -22,7 +22,7 @@ class Shares(Base):
     id = Column(Integer, primary_key=True)
     time = Column(DateTime, nullable=False)
     rem_host = Column(String(80), nullable=False)
-    username = Column(String(80), nullable=False)
+    address = Column(String(80), nullable=False)
     worker = Column(String(80), nullable=False)
     our_result = Column(String(250), nullable=False)
     upstream_result = Column(String(250), nullable=False)
