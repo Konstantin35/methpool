@@ -127,6 +127,10 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 	fmt.Println(vars["miner"])
 
+
+	miner := vars["miner"]
+	worker := vars["worker"]
+
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
     checkErr(err)
@@ -144,15 +148,24 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         fmt.Println("number of shares in 3 minutes:", minerShares)
     }
 
+    stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty) VALUES ( ?, ?, ?, ?) ON DUPLICATE KEY UPDATE address = VALUES(address)")
+    checkErr(err)
+
+    res, err := stmt.Exec((miner + worker), worker, cnt, minerDifficulty)
+    checkErr(err)
+
+    id, err := res.LastInsertId()
+    checkErr(err)
+
+    logInfo.Println(id)
+
+
 	// testing difficulty
 	minerDifficulty = 0.2 // Set a fixed difficulty (5MH/s) in this case
 
 
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
-	fmt.Println("Miner difficulty: %d\n", minerAdjustedDifficulty)
-
-	miner := vars["miner"]
-	worker := vars["worker"]
+	fmt.Println("Miner difficulty:", minerAdjustedDifficulty)
 
 	decoder := json.NewDecoder(req.Body)
 	var t Request
