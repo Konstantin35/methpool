@@ -47,7 +47,7 @@ var okRequest = `{
 
 var minerShares int
 
-var minerDifficulty int
+var minerDifficulty float64
 
 var pow256 = common.BigPow(2, 256)
 
