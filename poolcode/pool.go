@@ -47,6 +47,8 @@ var okRequest = `{
 
 var minerShares int
 
+var minerBeat int
+
 var minerDifficulty float64
 
 var pow256 = common.BigPow(2, 256)
@@ -125,39 +127,55 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     	minerShares = 3
     }
 
-	fmt.Println(vars["miner"])
+	// fmt.Println(vars["miner"])
 
 
 	miner := vars["miner"]
 	worker := vars["worker"]
 
 	// test
-	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
+	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
     checkErr(err)
     defer db.Close()
 
-    // query
-    rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)")
+    aggaddress := (miner+worker)
+
+   // query 1
+    rows1, err := db.Query("select count(*) as cnt from  miners where address=? and time < DATE_SUB(NOW(),INTERVAL 3 MINUTE) ", aggaddress)
     checkErr(err)
 
-    for rows.Next() {
+    for rows1.Next() {
         var cnt int
-        err = rows.Scan(&cnt)
+        err = rows1.Scan(&cnt)
         checkErr(err)
-        minerShares = cnt
-        fmt.Println("number of shares in 3 minutes:", minerShares)
+        minerBeat = cnt
+        // fmt.Println("number of shares in 3 minutes:", test)
     }
+	if minerBeat == 1 {
+		// query 2
+		rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)")
+		checkErr(err)
 
-    stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty)")
-    checkErr(err)
+		for rows.Next() {
+			var cnt int
+			err = rows.Scan(&cnt)
+			checkErr(err)
+			minerShares = cnt
+			fmt.Println("number of shares in 3 minutes:", minerShares)
+		}
 
-    res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
-    checkErr(err)
+		stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
+		checkErr(err)
 
-    id, err := res.LastInsertId()
-    checkErr(err)
+		res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
+		checkErr(err)
 
-    logInfo.Println(id)
+		id, err := res.LastInsertId()
+		checkErr(err)
+
+    	logInfo.Println(id)
+
+    }
 
 
 	// testing difficulty
@@ -165,7 +183,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
-	fmt.Println("Miner difficulty:", minerAdjustedDifficulty)
+	//fmt.Println("Miner difficulty:", minerAdjustedDifficulty)
 
 	decoder := json.NewDecoder(req.Body)
 	var t Request
@@ -237,10 +255,6 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     remoteip := remoteipa[0]
 
     mysqldiff := minerDifficulty * 4
-
-    db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // of course you have to enter your credentials here !
-    checkErr(err)
-    defer db.Close()
 
     stmt, err := db.Prepare("INSERT INTO shares (time, rem_host, address, worker, our_result, upstream_result, difficulty, reason, solution) VALUES ( NOW(), ?, ?, ?, ?, ?, ?, NULL, ?) ")
     checkErr(err)
