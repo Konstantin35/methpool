@@ -148,7 +148,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
         fmt.Println("number of shares in 3 minutes:", minerShares)
     }
 
-    stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty) VALUES ( ?, ?, ?, ?) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty)")
+    stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty)")
     checkErr(err)
 
     res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
