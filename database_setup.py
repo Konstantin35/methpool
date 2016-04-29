@@ -48,6 +48,7 @@ class Miners(Base):
     worker = Column(String(80), nullable=False)
     sharerate = Column(String(80), nullable=False)
     difficulty = Column(String(80), nullable=False)
+    time = Column(DateTime, nullable=False)
 
 
 engine = create_engine('mysql://pool_user:Sp3ctrum@localhost/methpool')
