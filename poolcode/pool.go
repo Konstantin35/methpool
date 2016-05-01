@@ -43,7 +43,11 @@ var okRequest = `{
   "result": true
 }`
 
-//test
+//test#
+
+var minerx string
+
+var workerx string
 
 var minerShares int
 
@@ -133,6 +137,10 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 	miner := vars["miner"]
 	worker := vars["worker"]
 
+	minerx = miner
+	workerx = worker
+
+
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
     checkErr(err)
@@ -153,7 +161,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     }
 	if minerBeat == 1 {
 		// query 2
-		rows, err := db.Query("select count(*) as cnt from  shares where time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)")
+		rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner)
 		checkErr(err)
 
 		for rows.Next() {
@@ -267,6 +275,9 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     checkErr(err)
 
     logInfo.Println(id)
+
+    // testing updating miners
+    testing()
 
 	// We've found a Block, we have to insert it
 
@@ -501,4 +512,36 @@ func checkErr(err error) {
     if err != nil {
         panic(err)
     }
+}
+
+// testing function
+func testing() {
+
+	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
+    checkErr(err)
+    defer db.Close()
+
+    rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", minerx)
+		checkErr(err)
+
+		for rows.Next() {
+			var cnt int
+			err = rows.Scan(&cnt)
+			checkErr(err)
+			minerShares = cnt
+			fmt.Println("number of shares in 3 minutes:", minerShares)
+		}
+
+	stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
+	checkErr(err)
+
+	res, err := stmt.Exec((minerx + workerx), workerx, minerShares, minerDifficulty)
+	checkErr(err)
+
+	id, err := res.LastInsertId()
+	checkErr(err)
+
+	fmt.Println("shares", minerShares)
+
+    logInfo.Println(id)
 }
