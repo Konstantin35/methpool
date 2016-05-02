@@ -45,9 +45,9 @@ var okRequest = `{
 
 //test#
 
-var minerx string
+var miner string
 
-var workerx string
+var worker string
 
 var minerShares int
 
@@ -137,8 +137,8 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 	miner := vars["miner"]
 	worker := vars["worker"]
 
-	minerx = miner
-	workerx = worker
+	//minerx = miner
+	//workerx = worker
 
 
 	// test
@@ -277,7 +277,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     logInfo.Println(id)
 
     // testing updating miners
-    testing()
+    updateMiner( miner, worker)
 
 	// We've found a Block, we have to insert it
 
@@ -295,9 +295,6 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 		logInfo.Println(id2)
 
 	}
-
-
-
 
 		fmt.Fprint(rw, okRequest)
 	} else {
@@ -515,13 +512,13 @@ func checkErr(err error) {
 }
 
 // testing function
-func testing() {
+func updateMiner( miner string, worker string) {
 
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
     checkErr(err)
     defer db.Close()
 
-    rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", minerx)
+    rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner)
 		checkErr(err)
 
 		for rows.Next() {
@@ -535,7 +532,7 @@ func testing() {
 	stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
 	checkErr(err)
 
-	res, err := stmt.Exec((minerx + workerx), workerx, minerShares, minerDifficulty)
+	res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
 	checkErr(err)
 
 	id, err := res.LastInsertId()
