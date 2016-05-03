@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -47,7 +47,7 @@ class Miners(Base):
     address = Column(String(80), unique=True)
     worker = Column(String(80), nullable=False)
     sharerate = Column(String(80), nullable=False)
-    difficulty = Column(String(80), nullable=False)
+    difficulty = Column(Float, nullable=False)
     time = Column(DateTime, nullable=False)
 
 
