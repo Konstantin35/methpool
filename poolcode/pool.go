@@ -152,34 +152,34 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     rows1, err := db.Query("select count(*) as cnt from  miners where address=? ", aggaddress)
     checkErr(err)
 
+	// query 1
     for rows1.Next() {
         var cnt int
         err = rows1.Scan(&cnt)
         checkErr(err)
         minerExist = cnt
-        // fmt.Println("Miner does not yet have an address, create one!")
     }
 
     if minerExist == 0 {
-    	minerDifficulty = 1
     	fmt.Println("Miner does not yet have an address, create one!")
-    	updateMiner( miner, worker)
+    	updateMiner( miner, worker, true)
     	fmt.Println("Done!")
     }
 
-   // query 1
+   // query 2
     rows2, err := db.Query("select count(*) as cnt from  miners where address=? and time < DATE_SUB(NOW(),INTERVAL 3 MINUTE) ", aggaddress)
     checkErr(err)
 
-    for rows1.Next() {
+    for rows2.Next() {
         var cnt int
         err = rows2.Scan(&cnt)
         checkErr(err)
         minerBeat = cnt
         // fmt.Println("number of shares in 3 minutes:", test)
     }
+
 	if minerBeat == 1 {
-		// query 2
+		// query 3
 		rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner)
 		checkErr(err)
 
@@ -292,7 +292,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     logInfo.Println(id)
 
     // testing updating miners
-    updateMiner( miner, worker)
+    updateMiner( miner, worker, false)
 
 	// We've found a Block, we have to insert it
 
@@ -527,7 +527,11 @@ func checkErr(err error) {
 }
 
 // testing function
-func updateMiner( miner string, worker string) {
+func updateMiner( miner string, worker string, newminer bool) {
+
+	if newminer {
+	minerDifficulty = 1
+	}
 
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
     checkErr(err)
@@ -564,7 +568,7 @@ func calculateVariance ( sharerate int, currentDiff float64) ( minernewDiff floa
 	switch {
 
 	case sharerate == 0 :
-		return currentDiff - ( currentDiff * 0.1 ) + currentDiff
+		return currentDiff - ( currentDiff * 0.1 )
 	case sharerate >= 1 && sharerate <= 3:
 		return currentDiff
 	case sharerate > 3:
