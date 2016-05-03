@@ -53,6 +53,8 @@ var minerShares int
 
 var minerBeat int
 
+var minerExist int
+
 var minerDifficulty float64
 
 var pow256 = common.BigPow(2, 256)
@@ -137,9 +139,8 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 	miner := vars["miner"]
 	worker := vars["worker"]
 
-	//minerx = miner
-	//workerx = worker
-
+	// testing difficulty
+	//minerDifficulty = 0.2 // Set a fixed difficulty (XMH/s) in this case
 
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
@@ -148,13 +149,31 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
     aggaddress := (miner+worker)
 
-   // query 1
-    rows1, err := db.Query("select count(*) as cnt from  miners where address=? and time < DATE_SUB(NOW(),INTERVAL 3 MINUTE) ", aggaddress)
+    rows1, err := db.Query("select count(*) as cnt from  miners where address=? ", aggaddress)
     checkErr(err)
 
     for rows1.Next() {
         var cnt int
         err = rows1.Scan(&cnt)
+        checkErr(err)
+        minerExist = cnt
+        // fmt.Println("Miner does not yet have an address, create one!")
+    }
+
+    if minerExist == 0 {
+    	minerDifficulty = 1
+    	fmt.Println("Miner does not yet have an address, create one!")
+    	updateMiner( miner, worker)
+    	fmt.Println("Done!")
+    }
+
+   // query 1
+    rows2, err := db.Query("select count(*) as cnt from  miners where address=? and time < DATE_SUB(NOW(),INTERVAL 3 MINUTE) ", aggaddress)
+    checkErr(err)
+
+    for rows1.Next() {
+        var cnt int
+        err = rows2.Scan(&cnt)
         checkErr(err)
         minerBeat = cnt
         // fmt.Println("number of shares in 3 minutes:", test)
@@ -175,7 +194,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 		stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
 		checkErr(err)
 
-		res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
+		res, err := stmt.Exec((miner + worker), worker, minerShares, calculateVariance(minerShares, minerDifficulty))
 		checkErr(err)
 
 		id, err := res.LastInsertId()
@@ -184,10 +203,6 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
     	logInfo.Println(id)
 
     }
-
-
-	// testing difficulty
-	minerDifficulty = 0.2 // Set a fixed difficulty (5MH/s) in this case
 
 
 	minerAdjustedDifficulty := int64(minerDifficulty * 1000000 * 60)
@@ -246,7 +261,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 			if hasher.Verify(myBlockRealDiff) {
 				submitWork(paramsOrig)
 				logInfo.Println(" -=###########################################################################=-")
-				logInfo.Println("--=############################# BLOCK FOUND !!! #############################=--")
+				logInfo.Println(" -=############################# BLOCK MINED !!! #############################=-")
 				logInfo.Println(" -=###########################################################################=-")
     upres = "Y"
 			}
@@ -532,7 +547,7 @@ func updateMiner( miner string, worker string) {
 	stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
 	checkErr(err)
 
-	res, err := stmt.Exec((miner + worker), worker, minerShares, minerDifficulty)
+	res, err := stmt.Exec((miner + worker), worker, minerShares, calculateVariance(minerShares, minerDifficulty))
 	checkErr(err)
 
 	id, err := res.LastInsertId()
@@ -541,4 +556,20 @@ func updateMiner( miner string, worker string) {
 	fmt.Println("shares", minerShares)
 
     logInfo.Println(id)
+}
+
+
+// testing calculate miner difficulty
+func calculateVariance ( sharerate int, currentDiff float64) ( minernewDiff float64) {
+	switch {
+
+	case sharerate == 0 :
+		return currentDiff - ( currentDiff * 0.1 ) + currentDiff
+	case sharerate >= 1 && sharerate <= 3:
+		return currentDiff
+	case sharerate > 3:
+		return currentDiff + (currentDiff * ( float64(sharerate) / 100 ))
+	}
+	return currentDiff
+
 }
