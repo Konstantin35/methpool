@@ -140,7 +140,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 	worker := vars["worker"]
 
 	// testing difficulty
-	//minerDifficulty = 0.2 // Set a fixed difficulty (XMH/s) in this case
+	minerDifficulty = getminerDiff( miner, worker)
 
 	// test
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
@@ -180,7 +180,7 @@ func handleMiner(rw http.ResponseWriter, req *http.Request) {
 
 	if minerBeat == 1 {
 		// query 3
-		rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner)
+		rows, err := db.Query("select count(*) as cnt from  shares where address=? and worker=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner, worker)
 		checkErr(err)
 
 		for rows.Next() {
@@ -529,15 +529,13 @@ func checkErr(err error) {
 // testing function
 func updateMiner( miner string, worker string, newminer bool) {
 
-	if newminer {
-	minerDifficulty = 1
-	}
+	var minerDiff float64 = getminerDiff( miner, worker)
 
 	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")  // you have to enter your credentials here !
     checkErr(err)
     defer db.Close()
 
-    rows, err := db.Query("select count(*) as cnt from  shares where address=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner)
+    rows, err := db.Query("select count(*) as cnt from  shares where address=? and worker=? and time >= DATE_SUB(NOW(),INTERVAL 3 MINUTE)", miner, worker)
 		checkErr(err)
 
 		for rows.Next() {
@@ -551,7 +549,7 @@ func updateMiner( miner string, worker string, newminer bool) {
 	stmt, err := db.Prepare("INSERT INTO miners (address, worker, sharerate, difficulty, time ) VALUES ( ?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE sharerate = VALUES(sharerate), difficulty = VALUES(difficulty), time = VALUES(time)")
 	checkErr(err)
 
-	res, err := stmt.Exec((miner + worker), worker, minerShares, calculateVariance(minerShares, minerDifficulty))
+	res, err := stmt.Exec((miner + worker), worker, minerShares, calculateVariance(minerShares, minerDiff))
 	checkErr(err)
 
 	id, err := res.LastInsertId()
@@ -576,4 +574,43 @@ func calculateVariance ( sharerate int, currentDiff float64) ( minernewDiff floa
 	}
 	return currentDiff
 
+}
+
+// testing load diff from miner
+func getminerDiff( miner string, worker string) ( minerDiff float64){
+
+	db, err := sql.Open("mysql", "pool_user:Sp3ctrum@/methpool?charset=utf8")
+    checkErr(err)
+    defer db.Close()
+
+    aggaddress := (miner+worker)
+
+    rows, err := db.Query("select count(*) as cnt from  miners where address=? ", aggaddress)
+    checkErr(err)
+
+	// query 1
+    for rows.Next() {
+        var cnt int
+        err = rows.Scan(&cnt)
+        checkErr(err)
+        minerExist = cnt
+    }
+
+    rows2, err := db.Query("select difficulty as diff from  miners where address=? ", aggaddress)
+    checkErr(err)
+
+	// query 2
+    for rows2.Next() {
+        var diff float64
+        err = rows2.Scan(&diff)
+        checkErr(err)
+        minerDiff = diff
+    }
+
+    if minerExist == 0 {
+		minerDiff = 1 // if diff 0 set start difficulty 1
+    	return 1
+    } else {
+    	return minerDiff // return real miner difficulty
+    }
 }
